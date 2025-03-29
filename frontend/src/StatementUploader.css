@@ -1,0 +1,283 @@
+.statement-uploader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    width: 100%;
+    padding: 0;
+    color: #333;
+    position: relative;
+}
+
+/* Hide default file input */
+input[type="file"] {
+    display: none;
+}
+
+.confirm-button {
+    background-color: #4CAF50;
+}
+
+.confirm-button:hover {
+    background-color: #45a049;
+}
+
+.misc-button {
+    background-color: #aaa;
+}
+
+.misc-button:hover {
+    background-color: #999;
+}
+
+.file-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.file-info-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+/* File Info Section */
+.file-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    height: 50px;
+}
+
+.file-upload-edit-detach {
+    display: flex;
+    gap: 10px;
+}
+
+/* File Name Display */
+.file-info p {
+    font-size: 16px;
+    color: #333;
+    margin: 0;
+}
+
+.hide {
+    display: none;
+}
+
+/* Detach Button */
+.statement-uploader-button {
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    white-space: nowrap;
+}
+
+.detach-button:hover {
+    background-color: #c9302c;
+}
+
+.detach-button {
+    background-color: #d9534f;
+}
+
+.mapping-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.mapping-dialog {
+    position: absolute;
+    border: 3px solid black;
+    top: 15%;
+    left: 17.5%;
+    background: #fff;
+    border-radius: 20px;
+    width: 60%;
+    height: 70vh;
+    text-align: center;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    padding: 2%;
+}
+
+.mapping-dialog-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* Darken by 20% */
+    z-index: 999; /* Make sure the overlay is behind the dialog */
+}
+
+.account-name-entry {
+    width: 100%;
+}
+
+.statement-uploader-text-input {
+    margin: 0 10px;
+    border: 1px solid #4CAF50;
+    border-radius: 5px;
+    font-size: 16px;
+    color: #333;
+    width: 20%;
+    height: 33px;
+}
+
+.statement-uploader-dropdown {
+    padding: 10px;
+    border: 1px solid #4CAF50;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    font-size: 16px;
+    color: #333;
+    width: 15%;
+    box-sizing: border-box;
+}
+
+.mapping-dialog-content {
+    height: auto;
+    width: 92.5%;
+    border: 2px solid #4CAF50;
+    border-radius: 10px;
+    padding: 3% 3% 6% 3%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 60px;
+}
+
+.basic-mapping {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.mapping-dialog-content-headers {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.mapping-dialog-content-header {
+    padding: 5px;
+    border: 1px solid #4CAF50;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    cursor: pointer;
+}
+
+.mapping-dialog-content-header:hover {
+    color: white;
+    background-color: #333;
+}
+
+.map-tos {
+    width: 100%;
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.map-to {
+    border: 1px solid #4CAF50;
+    border-radius: 10px;
+    width: 16%;
+    overflow: hidden;
+    padding: 1%;
+}
+
+.arrow-up {
+    margin-top: 7%;
+    font-size: 14px; /* Adjust size of the arrow */
+    color: #333; /* Set arrow color, change as needed */
+}
+
+.header-container {
+    width: 100%;
+    border-radius: 5px;
+    margin: 12px 0;
+}
+
+.empty-header-container {
+    border: 1px solid #4CAF50;
+    height: 30px;
+    width: 100%;
+    border-radius: 5px;
+}
+
+.autofill-mappings {
+    width: 100%;
+}
+
+.autofill-mapping {
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+    margin-bottom: 10px;
+    border: 1px solid #4CAF50;
+    border-radius: 10px;
+    padding: 15px 5px;
+}
+
+.autofill-mapping-content {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.autofill-map-fill-fillBasedOn {
+    width: 40%;
+    display: flex;
+    align-items: flex-start;
+}
+
+.autofill-map-fill-fillBasedOn span {
+    margin-top: 2%;
+}
+
+.autofill-map-fill-fillBasedOn select {
+    width: 50%;
+    margin: 0 2px;
+}
+
+.autofill-map-rules-section {
+    display: flex;
+    flex-direction: column;
+    width: 60%;
+    gap: 1px;
+}
+
+.autofill-map-fillValue-fillBasedOnValue {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.autofill-map-fillValue-fillBasedOnValue input{
+    width: 30%;
+}
+
+.add-rule-button {
+    margin-top: 5px;
+    max-width: 15%;
+}

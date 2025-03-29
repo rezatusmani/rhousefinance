@@ -1,0 +1,150 @@
+.spending-summary {
+    display: flex;
+    align-items: left;
+    margin: 0 auto;
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    height: 100%;
+}
+
+.left-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    margin: 2%;
+    transition: all 0.3s ease;
+    width: 46%;
+    overflow: hidden;
+}
+
+.right-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    margin: 2%;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    width: 46%;
+}
+
+.pie-chart-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 2%;
+    background-color: #f9f9f9;
+    margin: 0 auto;
+    transition: all 0.3s ease;
+    border: 1px solid #007bff;
+    border-radius: 10px;
+    overflow: hidden;
+    width: 90%;
+}
+
+.month-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 40%;
+}
+
+.month-navigation button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.3s;
+}
+
+.month-navigation button:hover {
+    background: #0056b3;
+}
+
+.month-navigation h2 {
+    margin: 0;
+    font-size: 20px;
+    color: #555;
+}
+
+/* Dropdown for Grouping */
+.pie-chart-container select {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #007bff;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border 0.3s;
+    background: white;
+}
+
+/* Account Filters */
+.account-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.account-filters h3 {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.account-filters label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    color: #555;
+    cursor: pointer;
+}
+
+.account-filters input {
+    cursor: pointer;
+    transform: scale(1.1);
+}
+
+/* Pie Chart */
+.recharts-responsive-container {
+    width: 100%;
+    display: flex;
+    justify-content: center; 
+    align-items: center;   
+    height: 300px;
+}
+
+/* Tooltip and Legend Styling */
+.recharts-tooltip-wrapper {
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background-color: white;
+    padding: 10px;
+}
+
+.recharts-legend-item {
+    font-size: 14px;
+    color: #444;
+}
+
+/* Responsive Styling */
+@media (max-width: 768px) {
+    .pie-chart-container {
+        padding: 20px;
+    }
+
+    .month-navigation {
+        justify-content: space-around;
+    }
+
+    .recharts-responsive-container {
+        height: 300px;
+    }
+}

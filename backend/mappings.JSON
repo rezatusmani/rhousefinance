@@ -1,0 +1,123 @@
+[
+  {
+    "name": "Vanguard",
+    "headers": [
+      "Account Number",
+      "Investment Name",
+      "Symbol",
+      "Shares",
+      "Share Price",
+      "Total Value",
+      ""
+    ],
+    "map": {
+      "date": null,
+      "amount": null,
+      "description": "Investment Name",
+      "category": null,
+      "type": null,
+      "balance": "Total Value"
+    },
+    "autofillMaps": [
+      {
+        "fill": "type",
+        "fillBasedOn": "description",
+        "map": {
+          "Vanguard": "Savings"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Chase Checking",
+    "headers": [
+      "Details",
+      "Posting Date",
+      "Description",
+      "Amount",
+      "Type",
+      "Balance",
+      "Check or Slip #\r"
+    ],
+    "map": {
+      "date": "Posting Date",
+      "amount": "Amount",
+      "description": "Description",
+      "category": null,
+      "type": null,
+      "balance": "Balance"
+    },
+    "autofillMaps": [
+      {
+        "fill": "type",
+        "fillBasedOn": "description",
+        "map": {
+          "LendingClub": "Savings",
+          "Vanguard": "Savings",
+          "Cooper Power": "Income",
+          "Anytime Fit": "Needs",
+          "Verizon Wireless Payments": "Needs",
+          "VZ WIRELESS": "Needs",
+          "Payment to Chase card ending in": "Transfer",
+          "deposit": "Transfer",
+          "Cash redemption": "Transfer",
+          "Zelle": "Transfer",
+          "Statement Credit Adjust": "Transfer",
+          "Offer:": "Transfer",
+          "Spotify": "Wants"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Chase Credit",
+    "headers": [
+      "Transaction Date",
+      "Post Date",
+      "Description",
+      "Category",
+      "Type",
+      "Amount",
+      "Memo"
+    ],
+    "map": {
+      "date": "Transaction Date",
+      "amount": "Amount",
+      "description": "Description",
+      "category": "Category",
+      "type": null,
+      "balance": null
+    },
+    "autofillMaps": [
+      {
+        "fill": "category",
+        "fillBasedOn": "category",
+        "map": {
+          "NO_CATEGORY": "Transfer"
+        }
+      },
+      {
+        "fill": "type",
+        "fillBasedOn": "category",
+        "map": {
+          "Food & Drink": "Wants",
+          "Entertainment": "Wants",
+          "Groceries": "Needs",
+          "Gas": "Needs",
+          "Home": "Needs",
+          "Health & Wellness": "Needs",
+          "Automotive": "Needs",
+          "Transfer": "Transfer"
+        }
+      },
+      {
+        "fill": "type",
+        "fillBasedOn": "description",
+        "map": {
+          "Payment Thank You": "Transfer",
+          "Spotify": "Wants"
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,51 @@
+/* Add this to your App.css */
+.app-nav {
+    background-color: #282c34;
+    height: 100%;
+    margin: 0;
+    width: 100%;
+    grid-row: 2;
+    grid-column: 1;
+}
+
+.app-nav ul {
+    list-style-type: none;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.app-nav ul li {
+    list-style-type: none;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.app-nav ul li a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+}
+
+.app-nav ul li a:hover {
+    color: rgb(107, 228, 128);
+}
+
+.nav-link-container {
+    display: flex;
+    justify-content: space-between;
+    width: auto;
+    background-color: #282c34;
+    border-top: 1px solid #ddd;
+}
+
+.nav-link {
+    padding: 15px 10px;
+    width: 100%;
+}
+
+.nav-link.active {
+    font-weight: bold;
+    color: rgb(107, 228, 128);
+}
