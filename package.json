@@ -2,6 +2,7 @@
   "proxy": "http://localhost:5000",
   "dependencies": {
     "dotenv": "^16.4.7",
+    "express-rate-limit": "^7.5.0",
     "font-awesome": "^4.7.0",
     "git": "^0.1.5",
     "git-filter-repo": "^0.0.30"
