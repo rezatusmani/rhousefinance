@@ -37,7 +37,6 @@
     gap: 20px;
     padding: 2%;
     background-color: #f9f9f9;
-    margin: 0 auto;
     transition: all 0.3s ease;
     border: 1px solid #007bff;
     border-radius: 10px;
@@ -110,6 +109,19 @@
 .account-filters input {
     cursor: pointer;
     transform: scale(1.1);
+}
+
+.totals {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    width: 90%;
+    justify-content: center;
+    text-align: center;
+}
+
+.totals-labels {
+    color: #958888;
 }
 
 /* Pie Chart */

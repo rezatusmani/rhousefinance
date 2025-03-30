@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import './SpendingSummary.css';
 
 const COLOR_PALETTE = [
@@ -88,42 +88,47 @@ const SpendingSummary = () => {
             .then(response => response.json())
             .then(transactions => {
                 const currentPeriod = getPeriodString(currentMonth);
-
+    
                 const filteredTransactions = transactions.filter(transaction => {
                     const txDate = new Date(transaction.date);
                     const txPeriod = getPeriodString(txDate);
-
+    
                     return (
                         txPeriod === currentPeriod
                     );
                 });
-
+    
                 const groupByKey = groupBy === 'type' ? 'type' : 'category';
-
-                setIncome(0);
-                setExpenses(0);
-
+    
+                // Reset income and expenses
+                let incomeTotal = 0;
+                let expensesTotal = 0;
+    
                 const validTypes = ['Needs', 'Wants', 'Unselected'];
-
+    
                 const totals = filteredTransactions.reduce((acc, transaction) => {
                     const key = transaction[groupByKey] || "Uncategorized";
-                    const { amount } = transaction;
-
+                    const { amount, type } = transaction;
+    
                     let parsedAmount = parseFloat(amount);
                     if (isNaN(parsedAmount)) return acc;
-
+    
                     parsedAmount = -parsedAmount;
-
-                    if (transaction.type === 'Income') {
-                        setIncome(income += Math.abs(parsedAmount));
-                    } else if (validTypes.includes(transaction.type)) {
-                        setExpenses(expenses += parsedAmount);
-                    }
-
+    
+                    if (type === 'Income') {
+                        incomeTotal += Math.abs(parsedAmount);
+                    } else if (validTypes.includes(type)) {
+                        expensesTotal += parsedAmount;
+                    }                    
+    
                     acc[key] = (acc[key] || 0) + parsedAmount;
                     return acc;
                 }, {});
-
+    
+                // Set income and expenses totals
+                setIncome(incomeTotal);
+                setExpenses(expensesTotal);
+    
                 const expenseData = Object.keys(totals)
                     .filter(key => validTypes.includes(key))
                     .map(key => ({
@@ -131,9 +136,9 @@ const SpendingSummary = () => {
                         value: Math.abs(totals[key].toFixed(2)),
                         color: getColor(key)
                     }));
-
+    
                 if (filterMode === 'month' || filterMode === 'year') {
-                    const savingsAmount = Math.max(0, income - expenses);
+                    const savingsAmount = Math.max(0, incomeTotal - expensesTotal);
                 
                     // Only add savings when grouping by type
                     if (savingsAmount > 0 && groupBy === 'type') {
@@ -144,23 +149,29 @@ const SpendingSummary = () => {
                         });
                     }
                 }
-
+    
                 const totalAmount = expenseData.reduce((sum, item) => sum + item.value, 0);
-
+    
                 const formattedData = expenseData.map(item => ({
                     ...item,
                     percentage: ((item.value / totalAmount) * 100).toFixed(2)
                 }));
-
+    
                 setData(formattedData);
             })
             .catch(error => console.error('Error fetching transactions:', error));
-    }, [groupBy, currentMonth, filterMode, income, expenses]);
-
+    }, [groupBy, currentMonth, filterMode]);
+    
     return (
         <div className='spending-summary'>
             <div className='left-column'>
                 <div className="pie-chart-container">
+                    {/* Group by dropdown */}
+                    <select value={groupBy} onChange={(e) => setGroupBy(e.target.value)}>
+                        <option value="type">Group by Type</option>
+                        <option value="category">Group by Category</option>
+                    </select>
+
                     {/* Pie chart */}
                     <div className='recharts-responsive-container'>
                         {data.length === 0 ? "No data available" :
@@ -175,7 +186,7 @@ const SpendingSummary = () => {
                                         outerRadius={100}
                                         animationDuration={300}
                                         label={({ name, percent, value }) => 
-                                            `${name}: ${(percent * 100).toFixed(0)}% $${value.toFixed(0)}`}
+                                            `${name}: ${(percent * 100).toFixed(0)}%$${value.toFixed(0)}`}
                                         >
                                         {data.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={entry.color} />
@@ -187,8 +198,14 @@ const SpendingSummary = () => {
                     </div>
 
                     <div className='totals'>
-                        Income: ${income.toFixed(0)} Expenses: ${Math.abs(expenses).toFixed(0)} Savings: ${Math.max(0, (income + expenses)).toFixed(0)}
+                        <div className='totals-labels'>
+                            Income - Expenses = Savings
+                        </div>
+                        <div className='totals-values'>
+                            ${income.toFixed(0)} - ${Math.abs(expenses).toFixed(0)} = ${(income - Math.abs(expenses)).toFixed(0)}
+                        </div>
                     </div>
+
 
                     <div className="month-navigation">
                         <button onClick={handlePrevPeriod}>&#9664;</button>
@@ -199,12 +216,6 @@ const SpendingSummary = () => {
                         </div>
                         <button onClick={handleNextPeriod}>&#9654;</button>
                     </div>
-
-                    {/* Group by dropdown */}
-                    <select value={groupBy} onChange={(e) => setGroupBy(e.target.value)}>
-                        <option value="type">Group by Type</option>
-                        <option value="category">Group by Category</option>
-                    </select>
 
                     {/* Filter mode dropdown */}
                     <div className="filter-mode">

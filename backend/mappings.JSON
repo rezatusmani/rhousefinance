@@ -29,47 +29,6 @@
     ]
   },
   {
-    "name": "Chase Checking",
-    "headers": [
-      "Details",
-      "Posting Date",
-      "Description",
-      "Amount",
-      "Type",
-      "Balance",
-      "Check or Slip #\r"
-    ],
-    "map": {
-      "date": "Posting Date",
-      "amount": "Amount",
-      "description": "Description",
-      "category": null,
-      "type": null,
-      "balance": "Balance"
-    },
-    "autofillMaps": [
-      {
-        "fill": "type",
-        "fillBasedOn": "description",
-        "map": {
-          "LendingClub": "Savings",
-          "Vanguard": "Savings",
-          "Cooper Power": "Income",
-          "Anytime Fit": "Needs",
-          "Verizon Wireless Payments": "Needs",
-          "VZ WIRELESS": "Needs",
-          "Payment to Chase card ending in": "Transfer",
-          "deposit": "Transfer",
-          "Cash redemption": "Transfer",
-          "Zelle": "Transfer",
-          "Statement Credit Adjust": "Transfer",
-          "Offer:": "Transfer",
-          "Spotify": "Wants"
-        }
-      }
-    ]
-  },
-  {
     "name": "Chase Credit",
     "headers": [
       "Transaction Date",
@@ -115,6 +74,47 @@
         "fillBasedOn": "description",
         "map": {
           "Payment Thank You": "Transfer",
+          "Spotify": "Wants"
+        }
+      }
+    ]
+  },
+  {
+    "name": "Chase Checking",
+    "headers": [
+      "Details",
+      "Posting Date",
+      "Description",
+      "Amount",
+      "Type",
+      "Balance",
+      "Check or Slip #\r"
+    ],
+    "map": {
+      "date": "Posting Date",
+      "amount": "Amount",
+      "description": "Description",
+      "category": null,
+      "type": null,
+      "balance": "Balance"
+    },
+    "autofillMaps": [
+      {
+        "fill": "type",
+        "fillBasedOn": "description",
+        "map": {
+          "LendingClub": "Savings",
+          "Vanguard": "Savings",
+          "Cooper Power": "Income",
+          "Anytime Fit": "Needs",
+          "Verizon Wireless Payments": "Needs",
+          "VZ WIRELESS": "Needs",
+          "Payment to Chase card ending in": "Transfer",
+          "deposit": "Transfer",
+          "Cash redemption": "Transfer",
+          "Zelle": "Transfer",
+          "Statement Credit Adjust": "Transfer",
+          "Offer:": "Transfer",
           "Spotify": "Wants"
         }
       }

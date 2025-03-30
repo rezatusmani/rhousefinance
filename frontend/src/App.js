@@ -12,7 +12,7 @@ function App() {
         <Router>
             <div className="app-container">
                 <div className='app-header-container'>
-                    <h1>Finance App</h1>
+                    <h1>RHouse Personal Finance</h1>
                 </div>
                 <Navigation />
 

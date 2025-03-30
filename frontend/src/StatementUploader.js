@@ -185,7 +185,6 @@ const StatementUploader = () => {
             headers: { 'Content-Type': 'application/json' }
         })
         .then(response => {
-            console.log('Mapping saved successfully', response);
             setIsDialogOpen(false);
         })
         .catch(error => {

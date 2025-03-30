@@ -17,9 +17,6 @@ app.use(cors());
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false  // Required for Render PostgreSQL
-    }
 });
 
 // Setup file upload using multer
@@ -54,40 +51,46 @@ app.post('/upload', upload.single('file'), async (req, res) => {
             complete: async (results) => {
                 const parsedData = results.data;
 
-            // Process the parsed data if the mapping is valid
-            let transactions = parsedData.map(row => {
-                let transaction = {
-                    account: mapping.name,
-                    date: row[mapping.map['date']] || new Date().toISOString().split('T')[0],
-                    amount: row[mapping.map['amount']],
-                    balance: row[mapping.map['balance']],
-                    category: row[mapping.map['category']] || "NO_CATEGORY",
-                    description: row[mapping.map['description']],
-                    type: 'Unselected'
-                };
+                // Process the parsed data if the mapping is valid
+                let transactions = parsedData.map(row => {
+                    let transaction = {
+                        account: mapping.name,
+                        date: row[mapping.map['date']] || new Date().toISOString().split('T')[0],
+                        amount: row[mapping.map['amount']],
+                        balance: row[mapping.map['balance']],
+                        category: row[mapping.map['category']] || "NO_CATEGORY",
+                        description: row[mapping.map['description']],
+                        type: 'Unselected'
+                    };
 
-                // Return null if date or amount is missing
-                if (!transaction['amount'] && !transaction['balance']) return null;
+                    // Return null if date or amount is missing
+                    if (!transaction['amount'] && !transaction['balance']) return null;
 
-                // Process autofill mappings
-                for (const autofillMap of mapping.autofillMaps) {
-                    // Convert the value to lowercase for comparison
-                    const valueToCheck = transaction[autofillMap.fillBasedOn].toLowerCase();
+                    // Process autofill mappings
+                    for (const autofillMap of mapping.autofillMaps) {
+                        // Convert the value to lowercase for comparison
+                        const valueToCheck = transaction[autofillMap.fillBasedOn].toLowerCase();
 
-                    // Loop through the map keys and check if any key exists within the value
-                    for (const key of Object.keys(autofillMap.map)) {
-                        if (valueToCheck.includes(key.toLowerCase())) {
-                            transaction[autofillMap.fill] = autofillMap.map[key];
-                            break; // Exit the loop once a match is found
+                        // Loop through the map keys and check if any key exists within the value
+                        for (const key of Object.keys(autofillMap.map)) {
+                            if (valueToCheck.includes(key.toLowerCase())) {
+                                transaction[autofillMap.fill] = autofillMap.map[key];
+                                break; // Exit the loop once a match is found
+                            }
                         }
                     }
-                }
 
-                return transaction;
-            }).filter(transaction => transaction !== null);
+                    return transaction;
+                }).filter(transaction => transaction !== null);
 
                 if (transactions.length > 0) {
                     await saveToDatabase(transactions);
+                    // Clean up the uploaded file
+                    fs.unlink(filePath, (err) => {
+                        if (err) {
+                            console.error('Error deleting file:', err);
+                        }
+                    });
                     res.status(200).json(transactions);
                 } else {
                     res.status(400).json({ error: 'No valid transactions found to insert' });
@@ -137,6 +140,7 @@ app.post('/upload-and-check', (req, res) => {
     });
 });
 
+// Save a new mapping
 app.post('/save-mapping', (req, res) => {
     const newMapping = req.body;
 
@@ -176,6 +180,7 @@ app.post('/save-mapping', (req, res) => {
     });
 });
 
+// Get mapping based on headers
 app.get('/get-mapping', (req, res) => {
     const requestedHeaders = req.query.headers; // Expecting headers as a query parameter (comma-separated or JSON array)
     const mappingsFilePath = path.join(__dirname, 'mappings.JSON');
@@ -220,10 +225,9 @@ app.get('/get-mapping', (req, res) => {
     });
 });
 
-
+// Delete all transactions from the database
 app.delete('/transactions', (req, res) => {
-    // Your code to delete all records from the database
-    pool.query('DELETE FROM transactions', (err, result) => {
+    pool.query('DELETE FROM public.transactions', (err, result) => {
         if (err) {
             res.status(500).send('Error deleting transactions');
         } else {
@@ -232,10 +236,11 @@ app.delete('/transactions', (req, res) => {
     });
 });
 
+// Delete a specific transaction by ID
 app.delete('/transactions/:id', (req, res) => {
     const { id } = req.params;
 
-    pool.query('DELETE FROM transactions WHERE id = $1', [id], (err, result) => {
+    pool.query('DELETE FROM public.transactions WHERE id = $1', [id], (err, result) => {
         if (err) {
             console.error('Error deleting transaction:', err);
             res.status(500).send('Error deleting transaction');
@@ -245,14 +250,12 @@ app.delete('/transactions/:id', (req, res) => {
     });
 });
 
-
 // Save transactions to the database
 const saveToDatabase = async (transactions) => {
-    console.log(transactions.balance);
-    const query = 'INSERT INTO transactions (amount, category, type, date, description, notes, account, balance) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)';
+    const query = 'INSERT INTO public.transactions (amount, category, type, date, description, notes, account, balance) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)';
     for (const transaction of transactions) {
         try {
-            const checkQuery = 'SELECT * FROM transactions WHERE amount = $1 AND date = $2 AND description = $3';
+            const checkQuery = 'SELECT * FROM public.transactions WHERE amount = $1 AND date = $2 AND description = $3';
             const result = await pool.query(checkQuery, [
                 transaction.amount, 
                 transaction.date,
@@ -277,10 +280,10 @@ const saveToDatabase = async (transactions) => {
     }
 };
 
-// PUT route to update any field of an transaction
+// PUT route to update any field of a transaction
 app.put('/transactions/:id', async (req, res) => {
     const { id } = req.params;
-    const updates = req.body; // Ensure the request body includes fields to update
+    const updates = req.body;
 
     if (Object.keys(updates).length === 0) {
         return res.status(400).send('No fields provided for update');
@@ -290,20 +293,19 @@ app.put('/transactions/:id', async (req, res) => {
     const values = Object.values(updates);
 
     const setClause = fields.map((field, index) => `${field} = $${index + 1}`).join(', ');
-    values.push(id); // Add id as the last parameter for WHERE clause
-
+    const query = `UPDATE public.transactions SET ${setClause} WHERE id = $${fields.length + 1}`;
+    
     try {
-        const result = await pool.query(
-            `UPDATE transactions SET ${setClause} WHERE id = $${values.length} RETURNING *`,
-            values
-        );
-        res.json(result.rows[0]);
+        await pool.query(query, [...values, id]);
+        res.status(200).send('Transaction updated');
     } catch (error) {
-        console.error(error);
+        console.error('Error updating transaction:', error);
         res.status(500).send('Error updating transaction');
     }
 });
 
-app.listen(5000, () => {
-    console.log('Server running on http://localhost:5000');
+// Start the server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
