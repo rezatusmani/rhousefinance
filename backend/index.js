@@ -252,32 +252,30 @@ app.delete('/transactions/:id', (req, res) => {
 });
 
 const saveToDatabase = async (transactions) => {
-    const insertQuery = `
-        INSERT INTO public.transactions (amount, category, type, date, description, notes, account, balance)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        ON CONFLICT (amount, date, description) 
-        DO UPDATE SET 
-            category = EXCLUDED.category,
-            type = EXCLUDED.type,
-            notes = EXCLUDED.notes,
-            account = EXCLUDED.account,
-            balance = EXCLUDED.balance;
-    `;
-
+    const query = 'INSERT INTO public.transactions (amount, category, type, date, description, notes, account, balance) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)';
     for (const transaction of transactions) {
         try {
-            await pool.query(insertQuery, [
+            const checkQuery = 'SELECT * FROM public.transactions WHERE amount = $1 AND date = $2 AND description = $3';
+            const result = await pool.query(checkQuery, [
                 transaction.amount, 
-                transaction.category,
-                transaction.type,
                 transaction.date,
-                transaction.description,
-                transaction.notes || '',  // Default to empty string if no notes
-                transaction.account,
-                transaction.balance,
+                transaction.description
             ]);
+
+            if (result.rows.length === 0) {
+                await pool.query(query, [
+                    transaction.amount, 
+                    transaction.category,
+                    transaction.type,
+                    transaction.date,
+                    transaction.description,
+                    transaction.notes || '',  // Default to empty string if no notes
+                    transaction.account,
+                    transaction.balance,
+                ]);
+            }
         } catch (error) {
-            console.error(`Error inserting/updating transaction ${JSON.stringify(transaction)}:`, error);
+            console.error(`Error inserting transaction ${JSON.stringify(transaction)}:`, error);
         }
     }
 };
