@@ -88,6 +88,7 @@ const StatementUploader = () => {
     };
 
     const handleDetach = () => {
+        document.getElementById('file-input').value = '';
         setShowMappingPrompt(false);
         setShowFileInfo(false);
         setFile(null);
@@ -155,15 +156,14 @@ const StatementUploader = () => {
     const handleSave = () => {
         const accountName = document.querySelector('.statement-uploader-text-input').value.trim(); // Get and trim the account name input
     
-        // Check if the account name input has text
         if (!accountName) {
-            alert("Please enter an account name."); // You can customize this message
-            return; // Exit the function if no account name is provided
+            alert("Please enter an account name."); 
+            return;
         }
 
         if (!mappedHeaders['balance'] && !mappedHeaders['amount']) {
-            alert("the balance or amount mappings have to have values"); // You can customize this message
-            return; // Exit the function if no account name is provided
+            alert("the \"balance\" OR the \"amount\" mapping must have a value");
+            return;
         }
     
         const jsonData = {
@@ -186,6 +186,7 @@ const StatementUploader = () => {
         })
         .then(response => {
             setIsDialogOpen(false);
+            setMap(jsonData);
         })
         .catch(error => {
             console.error('Error saving mapping:', error);
