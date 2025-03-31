@@ -33,6 +33,23 @@ app.get('/transactions', async (req, res) => {
     }
 });
 
+app.post('/transactions', async (req, res) => {
+    const { amount, category, type, date, description, notes, account, balance } = req.body;
+
+    try {
+        const query = `INSERT INTO transactions (amount, category, type, date, description, notes, account, balance) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`;
+
+        // Use NULL for balance if it's an empty string or undefined
+        const balanceValue = balance === "" || balance === undefined ? null : balance;
+
+        await pool.query(query, [amount, category, type, date, description, notes || '', account || '', balanceValue]);
+        res.status(201).json({ message: 'Transaction added successfully' });
+    } catch (error) {
+        console.error('Error adding transaction:', error);
+        res.status(500).json({ error: 'Unable to add transaction' });
+    }
+});
+
 app.post('/upload', upload.single('file'), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded' });

@@ -12,6 +12,16 @@ const formatDate = (dateString) => {
     return `${month}/${day}/${year}`;
 };
 
+// Function to format date as M/D/YY
+const formatDateToDateInput = (dateString) => {
+    const date = new Date(dateString);
+    const month = date.getMonth() + 1; // getMonth() returns 0-11, so add 1
+    const day = date.getDate();
+    const year = date.getFullYear().toString().slice(-2); // Get the last 2 digits of the year
+    //return YYYY-MM-DD format for input type date
+    return `${date.getFullYear()}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+};
+
 // Decode HTML entities
 const decodeHTML = (html) => {
     const txt = document.createElement('textarea');
@@ -42,6 +52,14 @@ const TransactionsTable = () => {
     });
     const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'desc' });
     const [filtersVisible, setFiltersVisible] = useState(false);  // New state for toggling visibility
+    
+    const [inputDate, setInputDate] = useState('');
+    const [inputDescription, setInputDescription] = useState('');
+    const [inputCategory, setInputCategory] = useState('');
+    const [inputType, setInputType] = useState('');
+    const [inputAmount, setInputAmount] = useState('');
+    const [inputBalance, setInputBalance] = useState('');
+    const [inputNotes, setInputNotes] = useState('');
 
     // Fetch transactions when the component mounts
     useEffect(() => {
@@ -116,12 +134,60 @@ const TransactionsTable = () => {
         }
     };
 
+    const handleAddCustomTransaction = async () => {
+        const newTransaction = {
+            account: 'Custom Input',
+            date: document.getElementById('input-date').value,
+            description: document.getElementById('input-description').value,
+            category: document.getElementById('input-category').value,
+            type: document.getElementById('input-type').value,
+            amount: document.getElementById('input-amount').value,
+            balance: document.getElementById('input-balance').value,
+            notes: document.getElementById('input-notes').value
+        };
+        try {
+            const response = await axios.post('http://localhost:5000/transactions', newTransaction);  // Send new transaction to backend
+            const createdTransaction = response.data;
+
+            // Ensure the created transaction has all required fields
+            const updatedTransaction = {
+                ...newTransaction,
+                id: createdTransaction.id || Math.random().toString(36).substr(2, 9), // Use backend ID or fallback
+            };
+
+            setTransactions((prevTransactions) => [...prevTransactions, updatedTransaction]);  // Update state with new transaction
+            setFilteredTransactions((prevFiltered) => [...prevFiltered, updatedTransaction]);  // Update filtered transactions
+            handleClearCustomInputs();
+        } catch (error) {
+            console.error('Error adding transaction:', error);  // Error handling
+        }
+    };
+
+    const handleClearCustomInputs = async () => {
+        console.log('inputDate', inputDate);
+        setInputAmount('');
+        setInputDescription('');
+        setInputCategory('');
+        setInputType('');
+        setInputBalance('');
+        setInputNotes('');
+        setInputDate('');
+    };
+
+    const handleCopyTransactionData = async (transaction) => {
+        setInputAmount(transaction.amount);
+        setInputDescription(transaction.description);   
+        setInputCategory(transaction.category);
+        setInputType(transaction.type);
+        setInputNotes(transaction.notes);
+        setInputDate(formatDateToDateInput(transaction.date));
+    };
+
     const handleDelete = async (id) => {
         try {
             await axios.delete(`http://localhost:5000/transactions/${id}`);
             setTransactions((prevTransactions) => prevTransactions.filter((transaction) => transaction.id !== id));
             setFilteredTransactions((prevFiltered) => prevFiltered.filter((transaction) => transaction.id !== id));
-            console.log(`Transaction with ID ${id} deleted`);
         } catch (error) {
             console.error(`Error deleting transaction with ID ${id}:`, error);
         }
@@ -159,7 +225,6 @@ const TransactionsTable = () => {
         try {
             // Send the updated type to the backend
             await axios.put(`http://localhost:5000/transactions/${id}`, { type });
-            console.log('Type updated successfully to', type);
         } catch (error) {
             console.error(`Error updating Type to ${type}:`, error);
         }
@@ -173,7 +238,6 @@ const TransactionsTable = () => {
         try {
             // Send the updated category to the backend
             await axios.put(`http://localhost:5000/transactions/${id}`, { category });
-            console.log('Category updated successfully to', category);
         } catch (error) {
             console.error(`Error updating Category to ${category}:`, error);
         }
@@ -189,7 +253,6 @@ const TransactionsTable = () => {
     const handleNoteBlur = async (id, notes) => {
         try {
             await axios.put(`http://localhost:5000/transactions/${id}`, { notes });
-            console.log('Notes updated successfully');
         } catch (error) {
             console.error('Error updating notes:', error);
         }
@@ -347,7 +410,7 @@ const TransactionsTable = () => {
                     </div>
                 </div>
             </div>
-            <div className='table-container'>
+            <div className='transaction-table-container'>
                 <table>
                     <thead>
                         <tr>
@@ -361,6 +424,83 @@ const TransactionsTable = () => {
                         </tr>
                     </thead>
                     <tbody>
+                        <tr>
+                            <td>
+                                Custom Input
+                            </td>
+                            <td>
+                                <input
+                                    type="date"
+                                    value={inputDate}
+                                    id="input-date"
+                                    onChange={(e) => setInputDate(e.target.value)}
+                                />
+                            </td>
+                            <td>
+                                <input
+                                    type="text"
+                                    value={inputDescription}
+                                    id="input-description"
+                                    placeholder="Description"
+                                    onChange={(e) => setInputDescription(e.target.value)}
+                                />
+                            </td>
+                            <td>
+                                <select value={inputCategory} id="input-category" onChange={(e) => setInputCategory(e.target.value)}>
+                                    <option value="NO_CATEGORY">Select a category...</option>
+                                    {Array.from(new Set(transactions.map((transaction) => transaction.category))).map((category) => (
+                                        <option key={category} value={category}>
+                                            {category}
+                                        </option>
+                                    ))}    
+                                </select>
+                            </td>
+                            <td>
+                                <select value={inputType} id="input-type" onChange={(e) => setInputType(e.target.value)}>
+                                    <option value="Unselected">Select a type...</option>
+                                    <option value="Needs">Needs</option>
+                                    <option value="Wants">Wants</option>
+                                    <option value="Savings">Savings</option>
+                                    <option value="Income">Income</option>
+                                    <option value="Transfer">Transfer</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input
+                                    type="number"
+                                    placeholder="Amount"
+                                    id="input-amount"
+                                    onChange={(e) => setInputAmount(e.target.value)}
+                                    value={inputAmount}
+                                />
+                            </td>
+                            <td>
+                                <input
+                                    type="number"
+                                    placeholder="Balance"
+                                    id="input-balance"
+                                    onChange={(e) => setInputBalance(e.target.value)}
+                                    value={inputBalance}
+                                />
+                            </td>
+                            <td>
+                                <input
+                                    type="text"
+                                    value={inputNotes}
+                                    id="input-notes"
+                                    onChange={(e) => setInputNotes(e.target.value)}
+
+                                />
+                            </td>
+                            <td className='actions'>
+                                <button onClick={handleAddCustomTransaction} className="add-btn">
+                                    <i className="fa fa-plus"></i>
+                                </button>
+                                <button onClick={handleClearCustomInputs} className="delete-btn">
+                                    <i className="fa fa-trash" aria-hidden="true"></i>
+                                </button>
+                            </td>
+                        </tr>
                         {sortedTransactions.length > 0 ? (
                             sortedTransactions.map((transaction, index) => (
                                 <tr key={index}>
@@ -368,7 +508,7 @@ const TransactionsTable = () => {
                                     <td>{formatDate(transaction.date)}</td>
                                     <td>{decodeHTML(transaction.description)}</td>
                                     <td>
-                                        <select value={transaction.category} className="transactions-table-dropdown" onChange={(e) => handleCategoryChange(transaction.id, e, e.target.value)}>
+                                        <select value={transaction.category} onChange={(e) => handleCategoryChange(transaction.id, e, e.target.value)}>
                                             //map the existing transactions to the select options
                                             <option value="NO_CATEGORY">Select a category...</option>
                                             {Array.from(new Set(transactions.map((transaction) => transaction.category))).map((category) => (
@@ -379,7 +519,7 @@ const TransactionsTable = () => {
                                         </select>
                                     </td>
                                     <td>
-                                        <select value={transaction.type} className="transactions-table-dropdown" onChange={(e) => handleTypeChange(transaction.id, e, e.target.value)}>
+                                        <select value={transaction.type} onChange={(e) => handleTypeChange(transaction.id, e, e.target.value)}>
                                             <option value="Unselected">Select a type...</option>
                                             <option value="Needs">Needs</option>
                                             <option value="Wants">Wants</option>
@@ -398,7 +538,10 @@ const TransactionsTable = () => {
                                             onBlur={() => handleNoteBlur(transaction.id, transaction.notes)} // On blur, save note to backend
                                         />
                                     </td>
-                                    <td>
+                                    <td className='actions'>
+                                        <button onClick={() => handleCopyTransactionData(transaction)} className="add-btn">
+                                            <i class="fa fa-clone"></i>
+                                        </button>
                                         <button onClick={() => handleDelete(transaction.id)} className="delete-btn">
                                             <i className="fa fa-trash" aria-hidden="true"></i>
                                         </button>

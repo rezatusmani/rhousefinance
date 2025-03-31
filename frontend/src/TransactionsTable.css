@@ -1,11 +1,11 @@
-.table-container {
+.transaction-table-container {
     width: 98%;
     margin: 1%;
     border-radius: 10px;
 }
 
 /* Overall table styling */
-.table-container table {
+.transaction-table-container table {
     width: 100%;
     background-color: #f9f9f9;
     overflow-x: auto; /* Enable horizontal scrolling */
@@ -13,24 +13,24 @@
     border-style: hidden!important;
 }
 
-.table-container table th:first-child {
+.transaction-table-container table th:first-child {
     border-top-left-radius: 10px;
 }
     
-.table-container table th:last-child {
+.transaction-table-container table th:last-child {
     border-top-right-radius: 10px;
 }
 
-.table-container table tr:last-child td:first-child {
+.transaction-table-container table tr:last-child td:first-child {
     border-bottom-left-radius: 10px;
 }
     
-.table-container table tr:last-child td:last-child {
+.transaction-table-container table tr:last-child td:last-child {
     border-bottom-right-radius: 10px;
 }
 
 /* Table headers and cells */
-.table-container th, td {
+.transaction-table-container th, td {
     padding: 10px 13px;
     text-align: left;
     font-size: 14px;
@@ -61,21 +61,28 @@
 
 
 /* Zebra striping for rows */
-.table-container tr:nth-child(even) {
+.transaction-table-container tr:nth-child(even) {
     background-color: #f2f2f2;
 }
 
-.table-container tr:hover {
+.transaction-table-container tr:hover {
     background-color: #ddd;
 }
 
 /* Table cell styles */
-.table-container td {
+.transaction-table-container td {
     color: #333;
 }
 
+.transaction-table-container .actions {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: 5px;
+}
+
 /* Notes input field styling */
-.table-container td input[type="text"] {
+.transaction-table-container td input[type="text"], input[type="date"], input[type="number"] {
     border: 1px solid #4CAF50;
     border-radius: 5px;
     background-color: #f9f9f9;
@@ -86,7 +93,7 @@
 }
 
 /* Type dropdown styling */
-.transactions-table-dropdown {
+.transaction-table-container td select {
     padding: 10px;
     border: 1px solid #4CAF50;
     border-radius: 5px;
@@ -193,7 +200,7 @@
 }
 
 /* Style for the delete button */
-.delete-btn {
+.transaction-table-container button {
     margin-top: 10px;
     background-color: #aaa;
     border: 1px solid #ccc;
@@ -208,7 +215,16 @@
     margin: 1%;
 }
 
+.transaction-table-container button i {
+    width: 15px;
+}
+
 .delete-btn:hover {
     background-color: #c9302c;
+    transition: all 0.3s;
+}
+
+.add-btn:hover {
+    background-color: #45a049;
     transition: all 0.3s;
 }
