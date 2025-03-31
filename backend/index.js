@@ -33,13 +33,21 @@ app.get('/transactions', async (req, res) => {
     }
 });
 
-// Endpoint for file upload and mapping check
 app.post('/upload', upload.single('file'), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    const mapping = JSON.parse(req.body.mapping);
+    let mapping;
+    try {
+        mapping = JSON.parse(req.body.mapping);
+    } catch (error) {
+        return res.status(400).json({ error: 'Invalid mapping format' });
+    }
+
+    if (!mapping.map) {
+        return res.status(400).json({ error: 'Mapping is missing or invalid' });
+    }
 
     try {
         const filePath = path.join(__dirname, 'uploads', req.file.filename);
@@ -51,7 +59,6 @@ app.post('/upload', upload.single('file'), async (req, res) => {
             complete: async (results) => {
                 const parsedData = results.data;
 
-                // Process the parsed data if the mapping is valid
                 let transactions = parsedData.map(row => {
                     let transaction = {
                         account: mapping.name,
@@ -63,19 +70,16 @@ app.post('/upload', upload.single('file'), async (req, res) => {
                         type: 'Unselected'
                     };
 
-                    // Return null if date or amount is missing
-                    if (!transaction['amount'] && !transaction['balance']) return null;
+                    // Skip invalid rows
+                    if (!transaction.amount && !transaction.balance) return null;
 
-                    // Process autofill mappings
-                    for (const autofillMap of mapping.autofillMaps) {
-                        // Convert the value to lowercase for comparison
-                        const valueToCheck = transaction[autofillMap.fillBasedOn].toLowerCase();
-
-                        // Loop through the map keys and check if any key exists within the value
+                    // Autofill mappings
+                    for (const autofillMap of mapping.autofillMaps || []) {
+                        const valueToCheck = (transaction[autofillMap.fillBasedOn] || '').toLowerCase();
                         for (const key of Object.keys(autofillMap.map)) {
                             if (valueToCheck.includes(key.toLowerCase())) {
                                 transaction[autofillMap.fill] = autofillMap.map[key];
-                                break; // Exit the loop once a match is found
+                                break;
                             }
                         }
                     }
@@ -85,20 +89,17 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 
                 if (transactions.length > 0) {
                     await saveToDatabase(transactions);
-                    // Clean up the uploaded file
                     fs.unlink(filePath, (err) => {
-                        if (err) {
-                            console.error('Error deleting file:', err);
-                        }
+                        if (err) console.error('Error deleting file:', err);
                     });
                     res.status(200).json(transactions);
                 } else {
-                    res.status(400).json({ error: 'No valid transactions found to insert' });
+                    res.status(400).json({ error: 'No valid transactions found' });
                 }
             },
             error: (error) => {
                 console.error('CSV Parsing Error:', error);
-                res.status(500).json({ error: 'Error parsing the CSV file' });
+                res.status(500).json({ error: 'Error parsing CSV file' });
             }
         });
     } catch (err) {
@@ -250,32 +251,33 @@ app.delete('/transactions/:id', (req, res) => {
     });
 });
 
-// Save transactions to the database
 const saveToDatabase = async (transactions) => {
-    const query = 'INSERT INTO public.transactions (amount, category, type, date, description, notes, account, balance) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)';
+    const insertQuery = `
+        INSERT INTO public.transactions (amount, category, type, date, description, notes, account, balance)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        ON CONFLICT (amount, date, description) 
+        DO UPDATE SET 
+            category = EXCLUDED.category,
+            type = EXCLUDED.type,
+            notes = EXCLUDED.notes,
+            account = EXCLUDED.account,
+            balance = EXCLUDED.balance;
+    `;
+
     for (const transaction of transactions) {
         try {
-            const checkQuery = 'SELECT * FROM public.transactions WHERE amount = $1 AND date = $2 AND description = $3';
-            const result = await pool.query(checkQuery, [
+            await pool.query(insertQuery, [
                 transaction.amount, 
+                transaction.category,
+                transaction.type,
                 transaction.date,
-                transaction.description
+                transaction.description,
+                transaction.notes || '',  // Default to empty string if no notes
+                transaction.account,
+                transaction.balance,
             ]);
-
-            if (result.rows.length === 0) {
-                await pool.query(query, [
-                    transaction.amount, 
-                    transaction.category,
-                    transaction.type,
-                    transaction.date,
-                    transaction.description,
-                    transaction.notes || '',  // Default to empty string if no notes
-                    transaction.account,
-                    transaction.balance,
-                ]);
-            }
         } catch (error) {
-            console.error(`Error inserting transaction ${JSON.stringify(transaction)}:`, error);
+            console.error(`Error inserting/updating transaction ${JSON.stringify(transaction)}:`, error);
         }
     }
 };

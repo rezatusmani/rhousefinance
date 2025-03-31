@@ -8,29 +8,24 @@ const COLOR_PALETTE = [
 ];
 
 const FIXED_COLORS = {
-    Unselected: '#FF6347',
-    Needs: '#4682B4',
-    Savings: '#32CD32',
-    Wants: '#FFD700'
-};
-
-const CATEGORY_COLORS = {
-    Shopping: '#FF6347',          // Tomato
-    Transfer: '#4682B4',          // SteelBlue
-    Automotive: '#32CD32',        // LimeGreen
-    Groceries: '#FFD700',         // Gold
-    Travel: '#FF69B4',            // HotPink
-    Entertainment: '#8A2BE2',     // BlueViolet
-    FoodAndDrink: '#00CED1',      // DarkTurquoise
-    BillsAndUtilities: '#FF4500', // OrangeRed
-    Home: '#7B68EE',              // MediumSlateBlue
-    Gas: '#20B2AA',               // LightSeaGreen
-    HealthAndWellness: '#ADFF2F', // GreenYellow
-    ProfessionalServices: '#D2691E', // Chocolate
-    FeesAndAdjustments: '#FF8C00', // DarkOrange
-    Personal: '#FF1493',          // DeepPink
-    Education: '#8B0000',         // DarkRed
-    GiftsAndDonations: '#20B2AA'  // LightSeaGreen
+    'Unselected': '#FF6347',
+    'Needs': '#4682B4',
+    'Wants': '#FFD700',
+    'Shopping': '#FF6347',          // Tomato
+    'Automotive': '#32CD32',        // LimeGreen
+    'Groceries': '#FFD700',         // Gold
+    'Travel': '#FF69B4',            // HotPink
+    'Entertainment': '#8A2BE2',     // BlueViolet
+    'Food & Drink': '#00CED1',      // DarkTurquoise
+    'Bills & Utilities': '#FF4500', // OrangeRed
+    'Home': '#7B68EE',              // MediumSlateBlue
+    'Gas': '#20B2AA',               // LightSeaGreen
+    'Health & Wellness': '#ADFF2F', // GreenYellow
+    'Professional Services': '#D2691E', // Chocolate
+    'Fees & Adjustments': '#FF8C00', // DarkOrange
+    'Personal': '#FF1493',          // DeepPink
+    'Education': '#8B0000',         // DarkRed
+    'Gifts & Donations': '#20B2AA'  // LightSeaGreen
 };
 
 const SpendingSummary = () => {
@@ -104,7 +99,7 @@ const SpendingSummary = () => {
                 let incomeTotal = 0;
                 let expensesTotal = 0;
     
-                const validTypes = ['Needs', 'Wants', 'Unselected'];
+                const validKeys = Object.keys(FIXED_COLORS);
     
                 const totals = filteredTransactions.reduce((acc, transaction) => {
                     const key = transaction[groupByKey] || "Uncategorized";
@@ -117,7 +112,7 @@ const SpendingSummary = () => {
     
                     if (type === 'Income') {
                         incomeTotal += Math.abs(parsedAmount);
-                    } else if (validTypes.includes(type)) {
+                    } else if (validKeys.includes(type)) {
                         expensesTotal += parsedAmount;
                     }                    
     
@@ -130,7 +125,7 @@ const SpendingSummary = () => {
                 setExpenses(expensesTotal);
     
                 const expenseData = Object.keys(totals)
-                    .filter(key => validTypes.includes(key))
+                    .filter(key => validKeys.includes(key) || validKeys.includes(key))
                     .map(key => ({
                         name: key,
                         value: Math.abs(totals[key].toFixed(2)),
@@ -145,7 +140,7 @@ const SpendingSummary = () => {
                         expenseData.push({
                             name: 'Savings',
                             value: parseFloat(savingsAmount.toFixed(2)),
-                            color: getColor('Savings')
+                            color: '#32CD32'
                         });
                     }
                 }
@@ -186,7 +181,7 @@ const SpendingSummary = () => {
                                         outerRadius={100}
                                         animationDuration={300}
                                         label={({ name, percent, value }) => 
-                                            `${name}: ${(percent * 100).toFixed(0)}%$${value.toFixed(0)}`}
+                                            `${name}: ${(percent * 100).toFixed(0)}% $${value.toFixed(0)}`}
                                         >
                                         {data.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={entry.color} />
@@ -202,7 +197,7 @@ const SpendingSummary = () => {
                             Income - Expenses = Savings
                         </div>
                         <div className='totals-values'>
-                            ${income.toFixed(0)} - ${Math.abs(expenses).toFixed(0)} = ${(income - Math.abs(expenses)).toFixed(0)}
+                            ${income.toFixed(0)} - ${Math.abs(expenses).toFixed(0)} = ${(income - Math.abs(expenses)).toFixed(0)} ({((income - Math.abs(expenses)) / income * 100).toFixed(0)}%)
                         </div>
                     </div>
 
@@ -219,10 +214,9 @@ const SpendingSummary = () => {
 
                     {/* Filter mode dropdown */}
                     <div className="filter-mode">
-                        <label>Filter by: </label>
                         <select value={filterMode} onChange={(e) => setFilterMode(e.target.value)}>
-                            <option value="month">Month</option>
-                            <option value="year">Year</option>
+                            <option value="month">Filter by Month</option>
+                            <option value="year">Filter by Year</option>
                         </select>
                     </div>
                 </div>

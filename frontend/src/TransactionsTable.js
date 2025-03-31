@@ -165,6 +165,20 @@ const TransactionsTable = () => {
         }
     };
 
+    const handleCategoryChange = async (id, event, category) => {
+        const updatedTransactions = transactions.map(transaction =>
+            transaction.id === id ? { ...transaction, category: event.target.value } : transaction
+        );
+        setTransactions(updatedTransactions); // Update the state with new category value
+        try {
+            // Send the updated category to the backend
+            await axios.put(`http://localhost:5000/transactions/${id}`, { category });
+            console.log('Category updated successfully to', category);
+        } catch (error) {
+            console.error(`Error updating Category to ${category}:`, error);
+        }
+    };
+
     const handleNoteChange = (id, event) => {
         const updatedTransactions = filteredTransactions.map(transaction =>
             transaction.id === id ? { ...transaction, notes: event.target.value } : transaction
@@ -213,6 +227,11 @@ const TransactionsTable = () => {
     const toggleFilters = () => {
         setFiltersVisible(!filtersVisible);
     };
+
+    // Calculate the total amount for the footer
+    const totalAmount = filteredTransactions.reduce((sum, transaction) => {
+        return sum + parseFloat(transaction.amount || 0);
+    }, 0);
 
     return (
         <div>
@@ -348,9 +367,19 @@ const TransactionsTable = () => {
                                     <td>{transaction.account}</td>
                                     <td>{formatDate(transaction.date)}</td>
                                     <td>{decodeHTML(transaction.description)}</td>
-                                    <td>{transaction.category === "NO_CATEGORY" ? '' : decodeHTML(transaction.category)}</td>
                                     <td>
-                                        <select value={transaction.type} className="type-dropdown" onChange={(e) => handleTypeChange(transaction.id, e, e.target.value)}>
+                                        <select value={transaction.category} className="transactions-table-dropdown" onChange={(e) => handleCategoryChange(transaction.id, e, e.target.value)}>
+                                            //map the existing transactions to the select options
+                                            <option value="NO_CATEGORY">Select a category...</option>
+                                            {Array.from(new Set(transactions.map((transaction) => transaction.category))).map((category) => (
+                                                <option key={category} value={category}>
+                                                    {category}
+                                                </option>
+                                            ))}    
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select value={transaction.type} className="transactions-table-dropdown" onChange={(e) => handleTypeChange(transaction.id, e, e.target.value)}>
                                             <option value="Unselected">Select a type...</option>
                                             <option value="Needs">Needs</option>
                                             <option value="Wants">Wants</option>
@@ -382,6 +411,13 @@ const TransactionsTable = () => {
                             </tr>
                         )}
                     </tbody>
+                    <tfoot>
+                            <tr>
+                                <td colSpan="5" className="total-row">Total:</td>
+                                <td>{formatCurrency(totalAmount)}</td>
+                                <td colSpan="3"></td>
+                            </tr>
+                    </tfoot>
                 </table>
             </div>
 

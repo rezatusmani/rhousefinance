@@ -1,3 +1,4 @@
 .env
 StartScript.bat
 uploads/
+backend/mappings.JSON
